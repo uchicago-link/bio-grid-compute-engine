@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Select a prefix for the instance names in your cluster
-readonly CLUSTER_PREFIX=my-grid
+readonly CLUSTER_PREFIX=biogrid
 
 # Name of GCE network to add instances to
 readonly CLUSTER_NETWORK=default

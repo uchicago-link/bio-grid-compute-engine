@@ -107,7 +107,8 @@ function get_list_by_fn() {
     list="$list $name"
   done
 
-  echo -n $list
+#echo -n $list
+  printf %s "$list"
 }
 readonly -f get_list_by_fn
 
