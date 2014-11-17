@@ -1,6 +1,9 @@
 Google Compute Engine Cluster for Grid Engine
 =============================================
 
+This was adapted from github repository at https://github.com/GoogleCloudPlatform/solutions-google-compute-engine-cluster-for-grid-engine.  See the GOOGLE_README.md for the original README.md file.
+
+
 Copyright
 ---------
 
@@ -268,4 +271,104 @@ You can now bring your cluster down either permanently or when you expect it to 
 * To bring up a cluster completely (**creates instances and disks**):
 
     ./cluster_setup.sh up-full
+    
+    
+    
+Shared File System
+------------------
 
+This is automated through the startup script, it is included here for reference.
+
+* Installing on Master
+```
+gcutil ssh biogrid-mm #Login in master
+sudo apt-get update  #Update apt-get packages
+sudo apt-get install glusterfs-server glusterfs-client -y #Install glusterfs
+```
+
+* Install on Nodes
+Login to nodes and update/install (repeat for each node)
+```
+gcutil ssh biogrid-ww-1 #Login in worker 1
+sudo apt-get update  #Update apt-get packages
+sudo apt-get install glusterfs-server glusterfs-client -y #Install glusterfs
+```
+Repeat for each node (ww-1,ww-2,etc.)
+
+* Probe for Worker on Master
+```
+gcutil ssh biogrid-mm #Login in master
+sudo gluster peer probe biogrid-ww-0
+sudo gluster peer probe biogrid-ww-1
+```
+
+* On master, create the volume that will be shared (biogrid-volume0). We will share the existing /mnt/data disk on master.
+```
+gcutil ssh biogrid-mm #Login in master
+sudo gluster volume create biogrid-volume biogrid-mm:/mnt/data
+```
+
+* Start the volume
+```
+gcutil ssh biogrid-mm #Login in master
+sudo gluster volume start biogrid-volume
+```
+
+* Make the shared directory and mount it
+```
+gcutil ssh biogrid-mm #Login in master
+mkdir biogrid-shared
+sudo mount -t glusterfs biogrid-mm:/biogrid-volume biogrid-shared/
+```
+
+* Mount the disk on the Nodes
+
+```
+gcutil ssh biogrid-ww-0
+mkdir biogrid-shared
+sudo mount -t glusterfs biogrid-mm:/biogrid-volume biogrid-shared/
+
+gcutil ssh biogrid-ww-1
+mkdir biogrid-shared
+sudo mount -t glusterfs biogrid-mm:/biogrid-volume biogrid-shared/
+```
+
+
+
+Reinstalling Grid Engine on a Node (it didn't work)
+---------------------------------------------------
+```
+ps aux|grep sge   # kill all processes (if any)
+sudo apt-get --yes purge gridengine-*
+```
+
+
+Creating Disk Images
+--------------------------------------------------
+* Go to web console and delete biogrid-mm (do not delete disks)
+* In console add under "Images"
+* Change the image name in the cluster_properties.sh file to `biogrid-master-image` and `biogrid-worker-image`
+```
+./cluster_setup.sh up-full image
+```
+
+* From push_configure.sh script
+```
+./push_configure.sh
+```
+
+* Mount the shared filesystem (3 different ways)
+
+* Login into each machine to mount the shared directory
+```
+sudo mount -t glusterfs biogrid-mm:/biogrid-volume /home/biogrid-shared/
+
+* Send ssh command to a node
+```
+gcutil ssh biogrid-ww-1 'sudo mount -t glusterfs biogrid-mm:/biogrid-volume /home/biogrid-shared/'
+```
+
+* Send ssh command to all worker nodes
+```
+gcutil listinstances | grep biogrid | awk '{print "gcutil ssh "$2" \x27sudo mount -t glusterfs biogrid-mm:/biogrid-volume /home/biogrid-shared/ \x27"}'
+```
