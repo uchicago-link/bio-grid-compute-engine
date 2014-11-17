@@ -40,13 +40,15 @@ readonly WORKER_DATA_DISK_PATTERN="${CLUSTER_PREFIX}-ww-%d-data"
 # in the zone us-central1-a, running debian-7
 readonly MASTER_NODE_MACHINE_TYPE=n1-standard-4
 readonly MASTER_NODE_ZONE=us-central1-a
-readonly MASTER_NODE_IMAGE=debian-7
+#readonly MASTER_NODE_IMAGE=debian-7
+readonly MASTER_NODE_IMAGE=biogrid-master-image
 readonly MASTER_NODE_DISK_SIZE_GB=500
 readonly MASTER_NODE_SCOPE=https://www.googleapis.com/auth/devstorage.full_control
 
 readonly WORKER_NODE_MACHINE_TYPE=n1-standard-4
 readonly WORKER_NODE_ZONE=us-central1-a
-readonly WORKER_NODE_IMAGE=debian-7
+#readonly WORKER_NODE_IMAGE=debian-7
+readonly WORKER_NODE_IMAGE=biogrid-worker-image
 readonly WORKER_NODE_DISK_SIZE_GB=500
 readonly WORKER_NODE_SCOPE=https://www.googleapis.com/auth/devstorage.full_control
 

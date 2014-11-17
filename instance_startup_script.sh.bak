@@ -19,7 +19,6 @@ set -o nounset
 
 # The following can be used to run master and worker-specific code
 
-################################################################################
 # Get the master list
 MASTERS=$(curl \
     "http://metadata/computeMetadata/v1/instance/attributes/cluster-master" \
@@ -43,59 +42,22 @@ else
   echo "I am NOT a master"
 fi
 
-################################################################################
 # Key off existence of the "data" mount point to determine whether
 # this is the first boot.
-declare first_boot=0
 if [[ ! -e /mnt/data ]]; then
-  first_boot=1
+
   # This is a good place to do things that only need to be done the
   # first time an instance is started.
+
   mkdir -p /mnt/data
 fi
 
-################################################################################
 # Get the device name of the "data" disk
 DISK_DEV=$(basename $(readlink /dev/disk/by-id/google-$(hostname)-data))
 
-################################################################################
 # Mount it
 /usr/share/google/safe_format_and_mount \
   -m "mkfs.ext4 -F -q" /dev/$DISK_DEV /mnt/data #&> /tmp/mount.txt
 
 chmod 777 /mnt/data
 
-################################################################################
-#
-# Custom setup and installations
-#  - This is run as root on the instance so the sudo isn't necessary
-#
-################################################################################
-echo "############## Staring custom installs and setup..."
-echo "############## `whoami` running on `hostname`"
-echo "############## Updating apt-get and installing packages"
-sudo apt-get update
-
-echo "############## Creating shared directory"
-if [[ ! -e /home/biogrid-shared ]]; then
-    sudo mkdir -p /home/biogrid-shared
-    sudo chmod 777 /home/biogrid-shared
-fi
-
-echo "############## Installing glusterfs"
-sudo apt-get install glusterfs-server glusterfs-client -y
-
-if [[ $i_am_master -eq 1 ]]; then
-    echo "############## Starting glusterfs on master"
-    sudo gluster volume create biogrid-volume biogrid-mm:/mnt/data
-    sudo gluster volume start biogrid-volume
-    # MOVE THIS TO SCRIPT BECAUSE WE DONT' KNOW IF IT WILL BE THERE for workers
-    #sudo mount -t glusterfs biogrid-mm:/biogrid-volume /home/biogrid-shared/
-
-    echo "############## Installing emacs"
-    #sudo apt-get install emacs -y
-else
-    echo "I am NOT a master"
-fi
-
-#if [[ $first_boot -eq 1]]; then

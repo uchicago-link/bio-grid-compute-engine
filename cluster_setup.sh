@@ -27,29 +27,37 @@
 # To use this script review and update the "readonly" parameters
 # below. Then run:
 #
-#   ./cluster_setup.sh up-full   # Full bring-up (including disks)
-#   ./cluster_setup.sh down-full # Full teardown (including disks)
+#   ./cluster_setup.sh up-full   [image|newcluster] # Full bring-up (including disks)
+#   ./cluster_setup.sh down-full [image|newcluster] # Full teardown (including disks)
 #
-#   ./cluster_setup.sh up        # Bring-up assumes disks exist
-#   ./cluster_setup.sh down      # Teardown does not destroy disks
+#   ./cluster_setup.sh up [image|newcluster]        # Bring-up assumes disks exist
+#   ./cluster_setup.sh down [image|newcluster]      # Teardown does not destroy disks
 #
 # So a common model would be:
 #
 # First bring up:
-#   ./cluster_setup.sh up-full
+#   ./cluster_setup.sh up-full newcluster
 #
 # Repeat:
 #   Bring-down:
-#     ./cluster_setup.sh down
+#     ./cluster_setup.sh down image
 #
 #   Bring-up:
-#     ./cluster_setup.sh up
+#     ./cluster_setup.sh up image
 #
 
 set -o errexit
 set -o nounset
 
-source cluster_properties.sh
+# EXTRA ARGS ###################################################################
+# Test if we are creating a new cluster or using an image
+################################################################################
+if [[ $2 =~ image ]]; then
+    source image_cluster_properties.sh
+else
+    source cluster_properties.sh
+fi
+
 
 ### Begin functions
 
@@ -157,7 +165,9 @@ function get_out_file() {
 }
 readonly -f get_out_file
 
+# MASTER #######################################################################
 # Adds the specified master node as a background task
+################################################################################
 function add_master_node() {
   local masters="$1"
   local instance_id="$2"
@@ -182,7 +192,9 @@ function add_master_node() {
 }
 readonly -f add_master_node
 
+# WORKER #######################################################################
 # Adds the specified worker node as a background task
+################################################################################
 function add_worker_node() {
   local masters="$1"
   local instance_id="$2"
@@ -234,8 +246,13 @@ readonly -f get_delete_list
 
 ### End functions
 
-### Begin MAIN execution
 
+
+################################################################################
+################################################################################
+### Begin MAIN execution
+################################################################################
+################################################################################
 # Grab the operation (up | down) from the command line
 readonly OPERATION=${1:-}
 
