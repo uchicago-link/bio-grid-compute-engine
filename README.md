@@ -248,6 +248,14 @@ Test
    `ls` in your home directory on the execution node should show
    "simple.sh.e1  simple.sh.o1"
 
+
+Reinstalling Grid Engine on a Node (it didn't work)
+---------------------------------------------------
+```
+ps aux|grep sge   # kill all processes (if any)
+sudo apt-get --yes purge gridengine-*
+```
+
 Cluster Lifecycle
 -----------------
 You can now bring your cluster down either permanently or when you expect it to be idle for an extended period of time (and want to save money).
@@ -332,16 +340,6 @@ gcutil ssh biogrid-ww-1
 mkdir biogrid-shared
 sudo mount -t glusterfs biogrid-mm:/biogrid-volume biogrid-shared/
 ```
-
-
-
-Reinstalling Grid Engine on a Node (it didn't work)
----------------------------------------------------
-```
-ps aux|grep sge   # kill all processes (if any)
-sudo apt-get --yes purge gridengine-*
-```
-
 
 Creating Disk Images
 --------------------------------------------------
