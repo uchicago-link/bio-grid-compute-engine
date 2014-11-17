@@ -285,7 +285,7 @@ You can now bring your cluster down either permanently or when you expect it to 
 Shared File System
 ------------------
 
-This is automated through the startup script, it is included here for reference.
+This is automated through the [instance_startup_script.sh](instance_startup_script.sh)startup script, it is included here for reference.
 
 * Installing on Master
 ```
